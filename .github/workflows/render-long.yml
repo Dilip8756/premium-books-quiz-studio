@@ -45,7 +45,7 @@ jobs:
       - name: Install narration dependencies
         run: |
           python3 -m venv .venv
-          .venv/bin/pip install --quiet edge-tts
+          .venv/bin/pip install --quiet edge-tts mutagen
 
       - name: Generate narration and plan shards
         id: plan

@@ -38,10 +38,20 @@ async def save(text,path):
     await edge_tts.Communicate(text,VOICE,rate=RATE).save(str(path))
 
 def audio_duration(path):
-    # FFprobe is included with FFmpeg. It measures the actual generated audio duration.
-    cmd=["ffprobe","-v","error","-show_entries","format=duration","-of","default=noprint_wrappers=1:nokey=1",str(path)]
-    result=subprocess.run(cmd,capture_output=True,text=True,check=True)
-    return float(result.stdout.strip())
+    # Prefer mutagen so cloud runners do not need a system FFmpeg install.
+    try:
+        from mutagen.mp3 import MP3
+        length=float(MP3(str(path)).info.length)
+        if length > 0:
+            return length
+    except Exception:
+        pass
+    try:
+        cmd=["ffprobe","-v","error","-show_entries","format=duration","-of","default=noprint_wrappers=1:nokey=1",str(path)]
+        result=subprocess.run(cmd,capture_output=True,text=True,check=True)
+        return float(result.stdout.strip())
+    except FileNotFoundError as err:
+        raise RuntimeError("Audio duration needs mutagen (pip install mutagen) or ffprobe on PATH.") from err
 
 def frames(seconds):
     return max(1, round(seconds*FPS))
