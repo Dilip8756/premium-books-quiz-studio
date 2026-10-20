@@ -2,6 +2,11 @@ import asyncio, json, os, subprocess
 from pathlib import Path
 import edge_tts
 
+try:
+    from mutagen.mp3 import MP3
+except ImportError:
+    MP3 = None
+
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "short.json"
 OUT = ROOT / "public" / "audio"
@@ -51,6 +56,8 @@ async def save_with_words(text, path):
     return words
 
 def audio_duration(path):
+    if MP3 is not None:
+        return MP3(str(path)).info.length
     cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
            "default=noprint_wrappers=1:nokey=1", str(path)]
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -58,6 +65,9 @@ def audio_duration(path):
 
 def make_tone(filename, frequency, seconds, volume):
     target = OUT / filename
+    # Tones are committed; delete one to force regeneration locally.
+    if target.exists() and target.stat().st_size > 0:
+        return
     cmd = ["ffmpeg", "-y", "-f", "lavfi", "-i",
            f"sine=frequency={frequency}:duration={seconds}:sample_rate=44100",
            "-af", f"volume={volume},afade=t=out:st={max(0, seconds - 0.05):.2f}:d=0.05",
