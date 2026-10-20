@@ -17,7 +17,7 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
       total_frames: ${{ steps.plan.outputs.total_frames }}
@@ -42,17 +42,13 @@ jobs:
       - name: Ensure Remotion browser
         run: npx remotion browser ensure
 
-      - name: Install narration dependencies
-        run: |
-          python3 -m venv .venv
-          .venv/bin/pip install --quiet edge-tts
-
-      - name: Generate narration and plan shards
+      - name: Validate narration and plan shards
         id: plan
         env:
           SHARDS: ${{ inputs.shards }}
         run: |
-          .venv/bin/python scripts/generate_tts.py
+          node scripts/validate.mjs
+          node scripts/validate-long-inputs.mjs
           node scripts/long-shard-plan.mjs "$SHARDS"
 
       - name: Upload prepared render inputs
