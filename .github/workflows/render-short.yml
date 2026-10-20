@@ -152,12 +152,13 @@ jobs:
             printf "file '%s'\n" "$PWD/$f" >> audio-list.txt
           done
           test "$(wc -l < video-list.txt)" -eq "$(wc -l < audio-list.txt)"
+          # No -shortest: shard WAVs can be a few samples shorter than video, which trims trailing frames.
           npx remotion ffmpeg -y \
             -f concat -safe 0 -i video-list.txt \
             -f concat -safe 0 -i audio-list.txt \
             -map 0:v:0 -map 1:a:0 \
             -c:v copy -c:a aac -b:a 320k -ar 48000 -ac 2 \
-            -shortest -movflags +faststart \
+            -movflags +faststart \
             output/premium-books-quiz-short.mp4
 
       - name: Verify output
