@@ -1,6 +1,7 @@
 node_modules/
 dist/
 output/
+.env
 .tmp-check/
 .venv/
 __pycache__/
