@@ -269,7 +269,8 @@ const HookScene = ({hook = "", preview = false, scene}) => {
   const numberMatch = String(hook).match(/(\d+)\s*%/);
   const bigNumber = numberMatch ? `${numberMatch[1]}%` : null;
   const restText = numberMatch ? String(hook).replace(numberMatch[0], "").trim() : String(hook);
-  const count = Math.round(interpolate(local, [4, 30], [0, 97], {...clamp, easing: easeOut}));
+  const countTarget = numberMatch ? Number(numberMatch[1]) : 0;
+  const count = Math.round(interpolate(local, [4, 30], [0, countTarget], {...clamp, easing: easeOut}));
   const counterText = numberMatch ? `${count}%` : null;
   const chipIn = interpolate(local, [18, 36], [0, 1], {...clamp, easing: easeOut});
   const mascotIn = interpolate(local, [10, 30], [0, 1], {...clamp, easing: easeOut});
@@ -1392,7 +1393,7 @@ export const PremiumBooksShort = ({hook = "", hookVoice = "", questions, cta = "
   while (safeQuestions.length < 3) {
     safeQuestions.push(normalizeQuestion(null, safeQuestions.length));
   }
-  const safeHook = hook || "97% अभ्यर्थी ये 3 सवाल गलत करते हैं। आप कर सकते हैं?";
+  const safeHook = hook || "सिर्फ 5% स्टूडेंट ही सही उत्तर दे पाते हैं।";
   const safeCta = cta || "ऐसे 30 सवालों का पूरा टेस्ट Premium Books ई-बुक में। Link bio में।";
   const timeline = React.useMemo(() => buildShortTimeline(audio, ctaEnabled), [audio, ctaEnabled]);
   const fontCss = React.useMemo(() => muktaCss(), []);

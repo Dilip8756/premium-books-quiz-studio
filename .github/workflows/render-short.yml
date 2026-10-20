@@ -6,7 +6,7 @@ on:
       shards:
         description: "Parallel frame shards"
         required: false
-        default: "8"
+        default: "16"
         type: choice
         options:
           - "4"
