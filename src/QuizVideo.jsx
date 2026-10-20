@@ -5,6 +5,8 @@ import {
   Easing,
   Sequence,
   Video,
+  continueRender,
+  delayRender,
   interpolate,
   staticFile,
   useCurrentFrame,
@@ -22,7 +24,40 @@ const C = {
   greenBorder: "#42f59b",
   red: "#fb7185"
 };
-const FONT = "'Nirmala UI','Mangal','Noto Sans Devanagari','Segoe UI',sans-serif";
+const DEVANAGARI_RANGE = "U+0900-097F,U+1CD0-1CF4,U+1CF7-1CF9,U+200C-200D,U+20A8,U+20B9,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B0A";
+const LATIN_RANGE = "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
+
+const MuktaFont = () => {
+  const [handle] = React.useState(() => delayRender("Loading Mukta font"));
+  React.useEffect(() => {
+    if (typeof document === "undefined" || !document.fonts) {
+      continueRender(handle);
+      return;
+    }
+    Promise.all(
+      [400, 600, 700, 800, 900].map((weight) =>
+        document.fonts.load(`${weight} 48px Mukta`, "अ आ क PREMIUM BOOKS 1950")
+      )
+    ).then(() => continueRender(handle)).catch(() => continueRender(handle));
+  }, [handle]);
+  return null;
+};
+
+const muktaCss = () => {
+  const faces = [400, 600, 700, 800].flatMap((weight) => [
+    {weight, file: `fonts/Mukta-${weight}-devanagari.woff2`, range: DEVANAGARI_RANGE},
+    {weight, file: `fonts/Mukta-${weight}-latin.woff2`, range: LATIN_RANGE}
+  ]);
+  return [
+    ...faces,
+    {weight: 900, file: "fonts/Mukta-800-devanagari.woff2", range: DEVANAGARI_RANGE},
+    {weight: 900, file: "fonts/Mukta-800-latin.woff2", range: LATIN_RANGE}
+  ].map(({weight, file, range}) =>
+    `@font-face{font-family:'Mukta';font-style:normal;font-weight:${weight};font-display:block;src:url('${staticFile(file)}') format('woff2');unicode-range:${range};}`
+  ).join("");
+};
+
+const FONT = "'Mukta','Nirmala UI','Mangal','Noto Sans Devanagari','Segoe UI',sans-serif";
 const LETTERS = ["A", "B", "C", "D"];
 
 const SIZES = {
@@ -601,6 +636,7 @@ export const PremiumBooksQuiz = ({questions, timings, portrait = false, preview 
   const baseWidth = portrait ? 562 : 1500;
   const baseHeight = baseWidth * (portrait ? 16 / 9 : 9 / 16);
   const scale = width / baseWidth;
+  const fontCss = React.useMemo(() => muktaCss(), []);
   const scenes = [];
   let cursor = 0;
   safeQuestions.forEach((q, i) => {
@@ -615,6 +651,8 @@ export const PremiumBooksQuiz = ({questions, timings, portrait = false, preview 
 
   return (
     <AbsoluteFill style={{background: "#040b17", overflow: "hidden"}}>
+      <MuktaFont />
+      <style>{fontCss}</style>
       <div
         style={{
           position: "absolute",
