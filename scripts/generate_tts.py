@@ -38,7 +38,7 @@ async def save(text,path):
     await edge_tts.Communicate(text,VOICE,rate=RATE).save(str(path))
 
 def audio_duration(path):
-    # Prefer mutagen so cloud runners do not need a system FFmpeg install.
+    # Prefer mutagen when present; fall back to system or Remotion's bundled ffprobe.
     try:
         from mutagen.mp3 import MP3
         length=float(MP3(str(path)).info.length)
@@ -46,12 +46,17 @@ def audio_duration(path):
             return length
     except Exception:
         pass
+    args=["ffprobe","-v","error","-show_entries","format=duration","-of","default=noprint_wrappers=1:nokey=1",str(path)]
     try:
-        cmd=["ffprobe","-v","error","-show_entries","format=duration","-of","default=noprint_wrappers=1:nokey=1",str(path)]
-        result=subprocess.run(cmd,capture_output=True,text=True,check=True)
+        result=subprocess.run(args,capture_output=True,text=True,check=True)
         return float(result.stdout.strip())
-    except FileNotFoundError as err:
-        raise RuntimeError("Audio duration needs mutagen (pip install mutagen) or ffprobe on PATH.") from err
+    except FileNotFoundError:
+        pass
+    remotion_cli=ROOT/"node_modules"/".bin"/("remotion.cmd" if os.name == "nt" else "remotion")
+    if remotion_cli.exists():
+        result=subprocess.run([str(remotion_cli),"ffprobe",*args[1:]],capture_output=True,text=True,check=True)
+        return float(result.stdout.strip())
+    raise RuntimeError("Audio duration needs mutagen, ffprobe, or a local Remotion install.")
 
 def frames(seconds):
     return max(1, round(seconds*FPS))
