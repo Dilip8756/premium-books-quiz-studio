@@ -1,4 +1,4 @@
-import asyncio, json, os, subprocess
+import asyncio, json, os, re, subprocess
 from pathlib import Path
 import edge_tts
 
@@ -8,10 +8,16 @@ OUT=ROOT/"public"/"audio"
 VOICE=os.environ.get("EDGE_TTS_VOICE","hi-IN-SwaraNeural")
 RATE=os.environ.get("EDGE_TTS_RATE","+0%")
 FPS=30
-PAUSE_SECONDS=float(os.environ.get("QUIZ_THINK_SECONDS","3"))
-TAIL_SECONDS=float(os.environ.get("QUIZ_TAIL_SECONDS","1.0"))
-MIN_QUESTION_SECONDS=float(os.environ.get("QUIZ_MIN_QUESTION_SECONDS","5"))
-MIN_EXPLANATION_SECONDS=float(os.environ.get("QUIZ_MIN_EXPLANATION_SECONDS","4"))
+# No fixed scene length: real narration duration drives the scene, while the
+# thinking pause and ending hold scale with the number of spoken words.
+PAUSE_BASE_SECONDS=float(os.environ.get("QUIZ_PAUSE_BASE_SECONDS","0.9"))
+PAUSE_SECONDS_PER_WORD=float(os.environ.get("QUIZ_PAUSE_SECONDS_PER_WORD","0.045"))
+PAUSE_MAX_SECONDS=float(os.environ.get("QUIZ_PAUSE_MAX_SECONDS","4.0"))
+TAIL_BASE_SECONDS=float(os.environ.get("QUIZ_TAIL_BASE_SECONDS","0.5"))
+TAIL_SECONDS_PER_WORD=float(os.environ.get("QUIZ_TAIL_SECONDS_PER_WORD","0.03"))
+TAIL_MAX_SECONDS=float(os.environ.get("QUIZ_TAIL_MAX_SECONDS","2.0"))
+QUESTION_AUDIO_BUFFER=float(os.environ.get("QUIZ_QUESTION_AUDIO_BUFFER","0.35"))
+EXPLANATION_AUDIO_BUFFER=float(os.environ.get("QUIZ_EXPLANATION_AUDIO_BUFFER","0.55"))
 
 OUT.mkdir(parents=True,exist_ok=True)
 
@@ -40,6 +46,20 @@ def audio_duration(path):
 def frames(seconds):
     return max(1, round(seconds*FPS))
 
+def word_count(text):
+    return len(re.findall(r"\S+", text or ""))
+
+def question_words(q):
+    return word_count(q.get("question","")) + sum(word_count(option) for option in q.get("options",[]))
+
+def thinking_pause_seconds(q):
+    seconds=PAUSE_BASE_SECONDS+question_words(q)*PAUSE_SECONDS_PER_WORD
+    return min(PAUSE_MAX_SECONDS,max(PAUSE_BASE_SECONDS,seconds))
+
+def ending_tail_seconds(q):
+    seconds=TAIL_BASE_SECONDS+word_count(q.get("explanation",""))*TAIL_SECONDS_PER_WORD
+    return min(TAIL_MAX_SECONDS,max(TAIL_BASE_SECONDS,seconds))
+
 async def main():
     questions=json.loads(DATA.read_text(encoding="utf-8"))
     if not questions: raise SystemExit("questions.json खाली है")
@@ -54,25 +74,35 @@ async def main():
         await save(answer_text(q),reveal)
         q_audio=audio_duration(stem)
         a_audio=audio_duration(reveal)
-        # Add a small safety buffer after each clip so the final syllable is not cut.
-        q_seconds=max(MIN_QUESTION_SECONDS,q_audio+0.45)
-        a_seconds=max(MIN_EXPLANATION_SECONDS,a_audio+0.65)
+        # Small per-clip safety buffer only; no fixed minimum scene duration.
+        q_seconds=q_audio+QUESTION_AUDIO_BUFFER
+        a_seconds=a_audio+EXPLANATION_AUDIO_BUFFER
         q_frames=frames(q_seconds)
         a_frames=frames(a_seconds)
-        pause_frames=frames(PAUSE_SECONDS)
-        scene_frames=q_frames+pause_frames+a_frames+frames(TAIL_SECONDS)
+        pause_seconds=thinking_pause_seconds(q)
+        tail_seconds=ending_tail_seconds(q)
+        pause_frames=frames(pause_seconds)
+        tail_frames=frames(tail_seconds)
+        scene_frames=q_frames+pause_frames+a_frames+tail_frames
+        q_words=question_words(q)
+        explanation_words=word_count(q.get("explanation",""))
         timings.append({
             "questionAudioSeconds":round(q_audio,3),
             "explanationAudioSeconds":round(a_audio,3),
+            "narrationSeconds":round(q_audio+a_audio,3),
+            "questionWords":q_words,
+            "explanationWords":explanation_words,
+            "pauseSeconds":round(pause_seconds,3),
+            "tailSeconds":round(tail_seconds,3),
             "questionFrames":q_frames,
             "pauseFrames":pause_frames,
             "explanationFrames":a_frames,
-            "tailFrames":frames(TAIL_SECONDS),
+            "tailFrames":tail_frames,
             "sceneFrames":scene_frames,
             "sceneSeconds":round(scene_frames/FPS,3)
         })
-        print(f"   audio: question={q_audio:.2f}s, answer/explanation={a_audio:.2f}s; scene={scene_frames/FPS:.2f}s")
-    timing_payload={"fps":FPS,"pauseSeconds":PAUSE_SECONDS,"tailSeconds":TAIL_SECONDS,"timings":timings}
+        print(f"   words: question+options={q_words}, explanation={explanation_words}; audio={q_audio+a_audio:.2f}s; pause={pause_seconds:.2f}s; scene={scene_frames/FPS:.2f}s")
+    timing_payload={"fps":FPS,"timingMode":"narration-audio + word-scaled pause/tail","timings":timings}
     (ROOT/"data"/"timings.json").write_text(json.dumps(timing_payload,ensure_ascii=False,indent=2),encoding="utf-8")
     (ROOT/"data"/"render-props.json").write_text(json.dumps({"questions":questions,"timings":timings},ensure_ascii=False,indent=2),encoding="utf-8")
     total=sum(t["sceneFrames"] for t in timings)

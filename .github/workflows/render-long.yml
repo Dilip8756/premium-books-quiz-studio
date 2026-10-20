@@ -1,0 +1,185 @@
+name: Render 16:9 Long
+
+on:
+  workflow_dispatch:
+    inputs:
+      shards:
+        description: "Parallel frame shards"
+        required: false
+        default: "16"
+        type: choice
+        options:
+          - "4"
+          - "8"
+          - "12"
+          - "16"
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      total_frames: ${{ steps.plan.outputs.total_frames }}
+      duration_seconds: ${{ steps.plan.outputs.duration_seconds }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Restore Remotion browser cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.remotion
+          key: remotion-browser-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Ensure Remotion browser
+        run: npx remotion browser ensure
+
+      - name: Install narration dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet edge-tts
+
+      - name: Generate narration and plan shards
+        id: plan
+        env:
+          SHARDS: ${{ inputs.shards }}
+        run: |
+          .venv/bin/python scripts/generate_tts.py
+          node scripts/long-shard-plan.mjs "$SHARDS"
+
+      - name: Upload prepared render inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: long-prep
+          path: |
+            data/render-props.json
+            data/timings.json
+            public/audio
+          retention-days: 1
+
+  render:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Restore Remotion browser cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.remotion
+          key: remotion-browser-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Download prepared render inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: long-prep
+          path: .
+
+      - name: Render shard ${{ matrix.shard.index }} (frames ${{ matrix.shard.start }}-${{ matrix.shard.end }})
+        run: |
+          mkdir -p output/shards
+          npx remotion render src/index.jsx PremiumBooksQuiz output/shards/video-${{ matrix.shard.index }}.mp4 \
+            --props=./data/render-props.json \
+            --frames=${{ matrix.shard.start }}-${{ matrix.shard.end }} \
+            --separate-audio-to=output/shards/audio-${{ matrix.shard.index }}.wav \
+            --concurrency=$(nproc) \
+            --timeout=120000 \
+            --overwrite
+
+      - name: Upload shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: long-shard-${{ matrix.shard.index }}
+          path: |
+            output/shards/video-${{ matrix.shard.index }}.mp4
+            output/shards/audio-${{ matrix.shard.index }}.wav
+          retention-days: 1
+
+  merge:
+    needs: [prepare, render]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Download shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: long-shard-*
+          path: chunks
+          merge-multiple: true
+
+      - name: Stitch video and audio
+        run: |
+          mkdir -p output
+          : > video-list.txt
+          : > audio-list.txt
+          for f in $(ls chunks/video-*.mp4 | sort -V); do
+            printf "file '%s'\n" "$PWD/$f" >> video-list.txt
+          done
+          for f in $(ls chunks/audio-*.wav | sort -V); do
+            printf "file '%s'\n" "$PWD/$f" >> audio-list.txt
+          done
+          test "$(wc -l < video-list.txt)" -eq "$(wc -l < audio-list.txt)"
+          # No -shortest: shard WAVs can be a few samples shorter than video, which trims trailing frames.
+          npx remotion ffmpeg -y \
+            -f concat -safe 0 -i video-list.txt \
+            -f concat -safe 0 -i audio-list.txt \
+            -map 0:v:0 -map 1:a:0 \
+            -c:v copy -c:a aac -b:a 320k -ar 48000 -ac 2 \
+            -movflags +faststart \
+            output/premium-books-quiz.mp4
+
+      - name: Verify output
+        run: |
+          EXPECTED="${{ needs.prepare.outputs.total_frames }}"
+          EXPECTED_SECONDS="${{ needs.prepare.outputs.duration_seconds }}"
+          FRAMES=$(npx remotion ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of csv=p=0 output/premium-books-quiz.mp4)
+          WIDTH=$(npx remotion ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 output/premium-books-quiz.mp4)
+          HEIGHT=$(npx remotion ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 output/premium-books-quiz.mp4)
+          FPS=$(npx remotion ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 output/premium-books-quiz.mp4)
+          AUDIO=$(npx remotion ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 output/premium-books-quiz.mp4)
+          DURATION=$(npx remotion ffprobe -v error -show_entries format=duration -of csv=p=0 output/premium-books-quiz.mp4)
+          echo "frames=$FRAMES expected=$EXPECTED size=${WIDTH}x${HEIGHT} fps=$FPS audio=$AUDIO duration=$DURATION expected_seconds=$EXPECTED_SECONDS"
+          test "$FRAMES" = "$EXPECTED"
+          test "$WIDTH" = "1920"
+          test "$HEIGHT" = "1080"
+          test "$FPS" = "30/1"
+          test "$AUDIO" = "aac"
+          awk "BEGIN{exit !($DURATION >= 600)}"
+
+      - name: Upload MP4 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: premium-books-quiz-long
+          path: output/premium-books-quiz.mp4
+          retention-days: 14
