@@ -125,9 +125,7 @@ async def main():
         report
     )
 
-    print("Countdown tones")
-    make_tone("short-tick.mp3", 1180, 0.12, 0.42)
-    make_tone("short-tock.mp3", 820, 0.12, 0.36)
+    print("Reveal tone")
     make_tone("short-reveal.mp3", 1318.5, 0.34, 0.3)
 
     report["totalSpeechSeconds"] = round(sum(c["seconds"] for c in report["clips"].values()), 3)

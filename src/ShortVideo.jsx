@@ -933,11 +933,9 @@ const ShortQuestionScene = ({q, index, preview, scene}) => {
           <Sequence from={0} durationInFrames={scene.speechFrames}>
             <Audio src={staticFile(`audio/short-q${index + 1}.mp3`)} volume={1} />
           </Sequence>
-          {[0, 1, 2].map((tick) => (
-            <Sequence key={tick} from={scene.countdownFrom + tick * 30} durationInFrames={6}>
-              <Audio src={staticFile(tick === 1 ? "audio/short-tock.mp3" : "audio/short-tick.mp3")} volume={1} />
-            </Sequence>
-          ))}
+          <Sequence from={scene.countdownFrom} durationInFrames={90}>
+            <Audio src={staticFile("audio/short-countdown.mp3")} volume={.7} />
+          </Sequence>
         </>
       ) : null}
     </div>
