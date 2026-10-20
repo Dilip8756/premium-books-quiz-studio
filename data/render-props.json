@@ -1,0 +1,72 @@
+{
+  "questions": [
+    {
+      "question": "भारतीय रिजर्व बैंक की स्थापना किस वर्ष हुई?",
+      "options": [
+        "1925",
+        "1935",
+        "1947",
+        "1950"
+      ],
+      "answer": 1,
+      "explanation": "भारतीय रिजर्व बैंक ने 1 अप्रैल 1935 को काम शुरू किया था। इसका राष्ट्रीयकरण 1949 में हुआ।",
+      "category": "अर्थव्यवस्था"
+    },
+    {
+      "question": "एक घंटे में कितने सेकंड होते हैं?",
+      "options": [
+        "600",
+        "1800",
+        "3600",
+        "6000"
+      ],
+      "answer": 2,
+      "explanation": "एक घंटे में 60 मिनट और हर मिनट में 60 सेकंड होते हैं। इसलिए 60 गुणा 60 बराबर 3600 सेकंड।",
+      "category": "गणित"
+    },
+    {
+      "question": "पृथ्वी के प्राकृतिक उपग्रह का नाम क्या है?",
+      "options": [
+        "टाइटन",
+        "चंद्रमा",
+        "फोबोस",
+        "यूरोपा"
+      ],
+      "answer": 1,
+      "explanation": "चंद्रमा पृथ्वी का प्राकृतिक उपग्रह है। यह पृथ्वी की परिक्रमा करता है और समुद्री ज्वार-भाटा पर भी प्रभाव डालता है।",
+      "category": "विज्ञान"
+    }
+  ],
+  "timings": [
+    {
+      "questionAudioSeconds": 19.752,
+      "explanationAudioSeconds": 14.064,
+      "questionFrames": 606,
+      "pauseFrames": 90,
+      "explanationFrames": 441,
+      "tailFrames": 30,
+      "sceneFrames": 1167,
+      "sceneSeconds": 38.9
+    },
+    {
+      "questionAudioSeconds": 17.256,
+      "explanationAudioSeconds": 13.92,
+      "questionFrames": 531,
+      "pauseFrames": 90,
+      "explanationFrames": 437,
+      "tailFrames": 30,
+      "sceneFrames": 1088,
+      "sceneSeconds": 36.267
+    },
+    {
+      "questionAudioSeconds": 16.392,
+      "explanationAudioSeconds": 13.104,
+      "questionFrames": 505,
+      "pauseFrames": 90,
+      "explanationFrames": 413,
+      "tailFrames": 30,
+      "sceneFrames": 1038,
+      "sceneSeconds": 34.6
+    }
+  ]
+}

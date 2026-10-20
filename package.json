@@ -1,0 +1,28 @@
+{
+  "name": "premium-books-quiz-studio",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "python scripts/generate_tts.py && remotion studio src/index.jsx",
+    "render": "python scripts/generate_tts.py && node scripts/validate.mjs && remotion render src/index.jsx PremiumBooksQuiz output/premium-books-quiz.mp4 --props=./data/render-props.json && node scripts/validate-output.mjs output/premium-books-quiz.mp4 1920 1080",
+    "validate": "node scripts/validate.mjs",
+    "validate-output": "node scripts/validate-output.mjs output/premium-books-quiz.mp4 1920 1080",
+    "build:ui": "vite build",
+    "ui": "npm run build:ui && node server.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.300",
+    "@remotion/media": "^4.0.300",
+    "@remotion/player": "^4.0.300",
+    "@remotion/renderer": "^4.0.300",
+    "express": "^4.21.2",
+    "remotion": "^4.0.300",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.15"
+  }
+}

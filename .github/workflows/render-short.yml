@@ -1,0 +1,40 @@
+name: Render 9:16 Short
+
+on:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install narration dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet edge-tts
+
+      - name: Generate narration and render props
+        run: .venv/bin/python scripts/generate_short_tts.py
+
+      - name: Render Short MP4
+        run: npx remotion render src/index.jsx PremiumBooksShort output/premium-books-quiz-short.mp4 --props=./data/short-props.json --concurrency=4 --timeout=120000
+
+      - name: Upload MP4 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: premium-books-quiz-short
+          path: output/premium-books-quiz-short.mp4
+          retention-days: 14

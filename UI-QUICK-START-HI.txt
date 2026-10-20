@@ -1,0 +1,19 @@
+PREMIUM BOOKS QUIZ STUDIO — QUICK START (हिंदी)
+
+1) ZIP Extract करें।
+2) Windows पर START-QUIZ-STUDIO.bat पर double-click करें।
+3) पहली बार Node packages install होंगे; internet आवश्यक है। जरूरत पड़ने पर Python का edge-tts package भी install होगा।
+4) Terminal में Studio ready दिखने पर browser में खोलें:
+   http://127.0.0.1:3001
+5) Question Editor में सवाल, चार विकल्प, सही उत्तर और व्याख्या बदलें।
+6) Save Changes दबाएँ।
+7) Preview के लिए 16:9 या 9:16 चुनें।
+8) Validate Questions जाँच करता है; Generate Voice-over हिंदी narration बनाता है; Render MP4 वीडियो export करता है।
+9) तैयार MP4 project के output folder में मिलेगा और browser UI में download/open link आएगा।
+
+जरूरी:
+- वीडियो बनने तक terminal खुला रखें।
+- Hindi voice-over के लिए internet और edge-tts आवश्यक हैं।
+- Preview audio muted है; rendered MP4 में narration शामिल होती है।
+- Render की अवधि और CPU time सवालों की संख्या, audio length और PC पर निर्भर करती है।
+- यदि Python command अलग है, terminal/Windows environment में PYTHON_CMD सेट किया जा सकता है।

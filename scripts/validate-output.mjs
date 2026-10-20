@@ -1,0 +1,17 @@
+import {execFileSync} from "node:child_process";
+import fs from "node:fs";
+const file = process.argv[2] || "output/premium-books-quiz.mp4";
+const expectedWidth = Number(process.argv[3] || 1920);
+const expectedHeight = Number(process.argv[4] || 1080);
+if (!fs.existsSync(file)) throw new Error(`Output file not found: ${file}`);
+const raw=execFileSync("ffprobe",["-v","error","-show_streams","-show_format","-of","json",file],{encoding:"utf8"});
+const data=JSON.parse(raw);
+const video=data.streams.find(s=>s.codec_type==="video");
+const audio=data.streams.find(s=>s.codec_type==="audio");
+if(!video) throw new Error("No video stream found.");
+if(!audio) throw new Error("No audio stream found — TTS may not have been muxed.");
+const duration=Number(data.format.duration);
+console.log(`Video: ${video.width}x${video.height}, ${video.r_frame_rate}; audio codec=${audio.codec_name}; duration=${duration.toFixed(2)}s`);
+if(video.width!==expectedWidth||video.height!==expectedHeight) throw new Error(`Expected ${expectedWidth}x${expectedHeight} output.`);
+if(!Number.isFinite(duration)||duration<=0) throw new Error("Invalid output duration.");
+console.log("PASS: MP4 contains both video and audio streams with expected dimensions.");

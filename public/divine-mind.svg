@@ -1,0 +1,37 @@
+<svg width="420" height="600" viewBox="0 0 420 600" role="img" aria-label="Code-drawn divine Premium Mind mascot">
+      <defs>
+        <radialGradient id="aura" cx="50%" cy="42%" r="58%"><stop offset="0" stop-color="#fff7c8" stop-opacity=".95"/><stop offset=".35" stop-color="#f6c44b" stop-opacity=".38"/><stop offset="1" stop-color="#f6c44b" stop-opacity="0"/></radialGradient>
+        <linearGradient id="brainGold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff3a6"/><stop offset=".32" stop-color="#f8ce58"/><stop offset=".68" stop-color="#d99a24"/><stop offset="1" stop-color="#8e5616"/></linearGradient>
+        <linearGradient id="brainEdge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff5b8"/><stop offset="1" stop-color="#9a641b"/></linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="10" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <circle cx="210" cy="244" r="185" fill="url(#aura)"/>
+      <defs><path id="orbitPath" d="M 210,78 A 166,166 0 1,1 209.9,78"/></defs>
+      <g class="orbitWords" aria-label="Premium Books Quiz Study">
+        <text fill="#fff0a0" font-size="15" font-weight="900" letter-spacing="2.4">
+          <textPath href="#orbitPath" startOffset="0%">PREMIUM • BOOKS • QUIZ • STUDY • PREMIUM • BOOKS • QUIZ • STUDY • </textPath>
+        </text>
+      </g>
+      <g opacity=".8" stroke="#ffe98c" stroke-width="3" stroke-linecap="round"><path d="M210 30v25 M210 433v24 M48 244h25 M347 244h25 M94 113l18 18 M310 355l18 18 M326 113l-18 18 M112 355l-18 18"/><circle cx="210" cy="244" r="151" fill="none" stroke-dasharray="3 15"/></g>
+      <!-- pedestal -->
+      <ellipse cx="210" cy="520" rx="132" ry="22" fill="#020915" opacity=".65"/><path d="M119 473 Q210 498 301 473 L322 514 Q210 545 98 514Z" fill="#132f50" stroke="#e8b747" stroke-width="4"/><ellipse cx="210" cy="475" rx="92" ry="20" fill="#f5c64e" stroke="#fff0a0" stroke-width="3"/><ellipse cx="210" cy="474" rx="72" ry="12" fill="#173b5b"/>
+      <!-- brain silhouette, constructed from vector paths -->
+      <g id="brainMascot" filter="url(#glow)" stroke="url(#brainEdge)" stroke-width="5" stroke-linejoin="round">
+        <path d="M207 148 C188 113 145 116 129 145 C93 145 77 176 88 204 C60 231 75 266 98 279 C82 314 107 343 137 343 C146 375 181 387 207 364Z" fill="url(#brainGold)"/>
+        <path d="M213 148 C232 113 275 116 291 145 C327 145 343 176 332 204 C360 231 345 266 322 279 C338 314 313 343 283 343 C274 375 239 387 213 364Z" fill="url(#brainGold)"/>
+        <path d="M210 146 Q201 182 210 209 Q196 239 210 267 Q198 302 210 365" fill="none" stroke="#9a641b" stroke-width="5"/>
+        <path d="M130 159 Q160 148 169 176 Q172 197 151 208 Q126 219 139 242 Q153 261 178 245 M100 214 Q122 201 134 224 Q141 244 119 257 M114 292 Q144 270 162 292 Q177 312 155 333 M170 139 Q188 161 178 184 M188 214 Q168 227 181 249 Q193 266 178 285 Q165 303 185 324" fill="none" stroke="#9d671d" stroke-width="6" stroke-linecap="round"/>
+        <path d="M290 159 Q260 148 251 176 Q248 197 269 208 Q294 219 281 242 Q267 261 242 245 M320 214 Q298 201 286 224 Q279 244 301 257 M306 292 Q276 270 258 292 Q243 312 265 333 M250 139 Q232 161 242 184 M232 214 Q252 227 239 249 Q227 266 242 285 Q255 303 235 324" fill="none" stroke="#9d671d" stroke-width="6" stroke-linecap="round"/>
+      </g>
+      <!-- wise, friendly face on the mind mascot -->
+      <g id="mindFace"><path d="M151 244 Q169 230 186 244 M234 244 Q251 230 269 244" fill="none" stroke="#5c3511" stroke-width="7" stroke-linecap="round"/><ellipse cx="169" cy="259" rx="10" ry="13" fill="#fff8dd"/><ellipse cx="251" cy="259" rx="10" ry="13" fill="#fff8dd"/><ellipse cx="171" cy="261" rx="5" ry="8" fill="#182b46"/><ellipse cx="249" cy="261" rx="5" ry="8" fill="#182b46"/><circle cx="173" cy="258" r="2.5" fill="#fff"/><circle cx="251" cy="258" r="2.5" fill="#fff"/><g id="mouthViseme">
+        <path id="mouthClosed" d="M187 307 Q210 315 233 307" fill="none" stroke="#7d2f2c" stroke-width="7" stroke-linecap="round"/>
+        <path id="mouthSmall" d="M192 302 Q210 325 228 302 Q210 337 192 302Z" fill="#7d2f2c" opacity="0"/>
+        <ellipse id="mouthWide" cx="210" cy="310" rx="24" ry="19" fill="#7d2f2c" opacity="0"/>
+        <ellipse id="mouthRound" cx="210" cy="309" rx="13" ry="18" fill="#7d2f2c" opacity="0"/>
+        <path id="mouthTeeth" d="M191 302 Q210 312 229 302 Q210 326 191 302Z" fill="#7d2f2c" opacity="0"/>
+        <path id="mouthToothLine" d="M197 306 Q210 312 223 306" fill="none" stroke="#fff5d7" stroke-width="4" stroke-linecap="round" opacity="0"/>
+      </g></g>
+      <!-- floating knowledge sparkles -->
+      <g fill="#fff2a0"><path d="M73 176l6 15 15 6-15 6-6 15-6-15-15-6 15-6Z"/><path d="M344 306l5 12 12 5-12 5-5 12-5-12-12-5 12-5Z"/><circle cx="116" cy="375" r="5"/><circle cx="307" cy="132" r="5"/></g>
+    </svg>

@@ -1,0 +1,37 @@
+{
+  "fps": 30,
+  "pauseSeconds": 3.0,
+  "tailSeconds": 1.0,
+  "timings": [
+    {
+      "questionAudioSeconds": 19.752,
+      "explanationAudioSeconds": 14.064,
+      "questionFrames": 606,
+      "pauseFrames": 90,
+      "explanationFrames": 441,
+      "tailFrames": 30,
+      "sceneFrames": 1167,
+      "sceneSeconds": 38.9
+    },
+    {
+      "questionAudioSeconds": 17.256,
+      "explanationAudioSeconds": 13.92,
+      "questionFrames": 531,
+      "pauseFrames": 90,
+      "explanationFrames": 437,
+      "tailFrames": 30,
+      "sceneFrames": 1088,
+      "sceneSeconds": 36.267
+    },
+    {
+      "questionAudioSeconds": 16.392,
+      "explanationAudioSeconds": 13.104,
+      "questionFrames": 505,
+      "pauseFrames": 90,
+      "explanationFrames": 413,
+      "tailFrames": 30,
+      "sceneFrames": 1038,
+      "sceneSeconds": 34.6
+    }
+  ]
+}
